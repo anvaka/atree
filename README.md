@@ -1,14 +1,11 @@
-# atree
+Christmas Tree
+===============
 
-Just a simple christmas tree, based on redit story
+I found animated Christmas tree on reddit:
 
-# install
+![alt](http://i.imgur.com/Fy4S1jR.gif)
 
-With [npm](https://npmjs.org) do:
-
-```
-npm install atree
-```
+Was curious to make it in js. This is work in progress
 
 # license
 
