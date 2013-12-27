@@ -1,116 +1,140 @@
-var max = 19,
-  xScale = 6,
-  zScale = 2.5,
-  yScale = 16,
-  startFrom = 0,
-  dz = 640,
+var thetamin = 0,
+    thetamax = 6*Math.PI,
+    period = 5,
+    linespacing = 1/30,
+    linelength = linespacing/2,
+    yscreenoffset = 300,
+    xscreenoffset = 260,
+    xscreenscale = 360,
+    yscreenscale = 360,
+    ycamera = 2,
+    zcamera = -3,
 
-  // I actually want it to be slower then 60fps
-  requestAnimationFrame = function(callback) {
-      window.setTimeout(callback, 1000 / 24);
-  };
+    rate = 1/(2*Math.PI), // every rotation y gets one bigger
+    factor = rate/3;
 
 function run() {
   var ctx = document.getElementById('scene').getContext('2d'),
-    redSpiralShadow = createSpiral({
-      foreground: "#660000",
-      background: "#330000",
-      isLeft: true,
-      yLocalScale: 1.01
-    }),
-    redSpiral = createSpiral({
+        redSpiral = new Spiral({
       foreground: "#ff0000",
-      background: "#440000",
-      isLeft: true,
-      yLocalScale: 1
+      angleoffset: Math.PI
     }),
-    cyanSpiralShadow = createSpiral({
-      foreground: "#003300",
-      background: "#000000",
-      isLeft: false,
-      yLocalScale: 1.01
+    redSpiralShadow = new Spiral({
+      foreground: "#660000",
+      angleoffset: Math.PI*0.95,
+      factor: 0.93*factor
     }),
-    cyanSpiral = createSpiral({
+    redSpiralShadow2 = new Spiral({
+      foreground: "#440000",
+      angleoffset: Math.PI*0.92,
+      factor: 0.90*factor
+    }),
+    cyanSpiral = new Spiral({
       foreground: "#00ffcc",
-      background: "#005633",
-      isLeft: false,
-      yLocalScale: 1
-    });
+      angleoffset: 0,
+    }),
+    cyanSpiralShadow = new Spiral({
+      foreground: "#003322",
+      angleoffset: -Math.PI*0.05,
+      factor:0.93*factor
+    }),
+    cyanSpiralShadow2= new Spiral({
+      foreground: "#002211",
+      angleoffset: -Math.PI*0.08,
+      factor:0.90*factor
+    })
+
 
   animationLoop();
 
 
   function animationLoop() {
-    renderFrame();
-    if (startFrom > 1) {
-      startFrom = 0;
-    } else {
-      startFrom += 0.1;
-    }
-
-    requestAnimationFrame(animationLoop);
+    window.setInterval(renderFrame, 1000 / 24);
   }
 
   function renderFrame() {
-    ctx.clearRect(0, 0, 480, 640);
+    ctx.clearRect(0, 0, 500, 500);
     ctx.beginPath();
 
-    xScale *= 0.93;
-    forEachStep(redSpiralShadow);
-    forEachStep(cyanSpiralShadow);
-    xScale /= 0.93;
+    redSpiralShadow2.draw(ctx);
+    cyanSpiralShadow2.draw(ctx);
 
-    forEachStep(redSpiral);
-    forEachStep(cyanSpiral);
+    redSpiralShadow.draw(ctx);
+    cyanSpiralShadow.draw(ctx);
+
+    redSpiral.draw(ctx);
+    cyanSpiral.draw(ctx);
   }
 
-  function forEachStep(callback) {
-    for (var i = -startFrom; i < max + startFrom; i += 0.08) {
-      if (i < 0 || i > max) continue;
-      callback(i);
-    }
-  }
+  function Spiral(config) {
+    /* config should have speed, sign, foreground, background  
+    */
+    this.foreground = config.foreground;
+    this.background = config.background;
+    this.angleoffset = config.angleoffset || 0;
+    this.period = config.period || period;
+    this.spacing = config.spacing || linespacing;
+    this.linelength = config.linelength || linelength;
+    this.offset = 0;
+    this.rate = config.rate || rate;
+    this.factor = config.factor || factor;
+    this.draw = function(ctx) {
+      var startcoord, startproject, endcoord, endproject;
 
-  function createSpiral(config) {
-    var sign = config.isLeft ? -1 : 1,
-      background = config.background,
-      foreground = config.foreground,
-      yLocalScale = config.yLocalScale || 1;
+      this.offset -= 1;
+      if (this.offset<0)
+        this.offset += this.period;
 
-    if (!config.isLeft) {
-      background = foreground;
-      foreground = config.background;
-    }
+      for (var theta=getdtheta(0, this.offset*this.spacing/this.period); theta<thetamax; theta+=getdtheta(theta, this.spacing)){
 
-    return function(i) {
-      var zoff = i * Math.sin(i),
-        z = dz / (dz - sign * zoff * zScale),
-        x = getX(i, z, sign),
-        y = getY(i * yLocalScale, z);
+        startcoord   = getcoord(theta, this);
+        startproject = project(startcoord);
 
-      if (zoff + sign * Math.PI / 4 < 0) {
-        switchColor(foreground);
-      } else {
-        switchColor(background);
+        endcoord     = getcoord(theta+getdtheta(theta, this.linelength), this);
+        endproject   = project(endcoord);
+
+        switchColor(this.foreground, Math.atan((startcoord[1]*this.factor/this.rate*0.1+0.02-startcoord[2])*40)*0.35+0.65);
+
+        ctx.moveTo(startproject[0], startproject[1]);
+        ctx.lineTo(endproject[0],   endproject[1]  );
       }
-      ctx.moveTo(x, y);
-      ctx.lineTo(getX(i + 0.03, z, sign), getY((i + 0.01) * yLocalScale, z));
-    };
+    }
+
   }
 
-  function switchColor(color) {
+  function switchColor(color, alpha) {
     ctx.closePath();
+    //ctx.lineWidth = 2;
     ctx.stroke();
-
     ctx.strokeStyle = color;
+    ctx.globalAlpha = alpha;
     ctx.beginPath();
   }
 
-  function getX(i, z, sign) {
-    return sign * i * Math.cos(i) * z * xScale + 255;
+  function getcoord(theta, that) {
+    return [theta*that.factor*Math.cos(theta+that.angleoffset),
+            that.rate*theta,
+            theta*that.factor*-Math.sin(theta+that.angleoffset)]
+  }
+  /*var getdtheta = (function(){
+    var a = rate;
+    var b = Math.pow(factor, 2)/2/rate;
+    return function (theta, length){
+      return length/(a+b*Math.pow(theta, 2)); //Math.sqrt(Math.pow(rate,2)+Math.pow((factor*theta),2));
+    }
+  })()*/
+  var cache = {}
+  function getdtheta(theta, length){
+    if (cache[length] === undefined)
+      cache[length] = {};
+    else if (cache[length][theta]!==undefined)
+      return cache[length][theta];
+    else
+      return cache[length][theta]=length/Math.sqrt(rate*rate+factor*factor*theta*theta);
   }
 
-  function getY(i, z) {
-    return i * z * yScale + 50;
+  function project(coord) {
+    return [xscreenoffset+xscreenscale*(coord[0]/(coord[2]-zcamera)),
+            yscreenoffset+yscreenscale*((coord[1]-ycamera)/(coord[2]-zcamera))]
   }
 }
