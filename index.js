@@ -76,44 +76,50 @@ function run() {
     this.rate = config.rate || rate;
     this.factor = config.factor || factor;
     this.cache = {};
-    this.draw = function(ctx) {
-      var startcoord, startproject, endcoord, endproject, alpha;
+    this.buffer = function() {
+      var startx, starty, startz, endx, endy, endz, startpx, startpy, endpx, endpy, alpha, thetanew, tempcache, thetaold;
+      for (var offset=0; offset>-this.period; offset--){
+        tempcache = [];
+        for (var theta=thetamin+getdtheta(thetamin, offset*this.spacing/this.period, this.rate, this.factor); theta<thetamax; theta+=getdtheta(theta, this.spacing, this.rate, this.factor)){
 
+          thetaold = (theta>=thetamin)?theta:thetamin;
+
+          startx = getcoordx(thetaold, this);
+          starty = getcoordy(thetaold, this);
+          startz = getcoordz(thetaold, this);
+          startpx = projectx(startx, starty, startz);
+          startpy = projecty(startx, starty, startz);
+
+          thetanew = theta+getdtheta(theta, this.linelength, this.rate, this.factor);
+          if (thetanew <= thetamin)
+            continue;
+          endx = getcoordx(thetanew, this);
+          endy = getcoordy(thetanew, this);
+          endz = getcoordz(thetanew, this);
+          endpx = projectx(endx, endy, endz);
+          endpy = projecty(endx, endy, endz);
+
+          alpha = Math.atan((starty*this.factor/this.rate*0.1+0.02-startz)*40)*0.35+0.65;
+
+          tempcache.push(startpx, startpy, endpx, endpy, alpha)
+        }
+        this.cache[offset] = new Float32Array(tempcache);
+      }
+    };
+    this.draw = function(ctx) {
       this.offset -= 1;
-      if (this.offset<0)
+      if (this.offset<=-this.period)
         this.offset += this.period;
 
-      if (!this.cache[this.offset]){
-        this.cache[this.offset] = [];
-        for (var theta=getdtheta(0, this.offset*this.spacing/this.period, this.rate, this.factor); theta<thetamax; theta+=getdtheta(theta, this.spacing, this.rate, this.factor)){
+      var offsetcache = this.cache[this.offset];
 
-          startcoord   = getcoord(theta, this);
-          startproject = project(startcoord);
-
-          endcoord     = getcoord(theta+getdtheta(theta, this.linelength, this.rate, this.factor), this);
-          endproject   = project(endcoord);
-
-          alpha = Math.atan((startcoord[1]*this.factor/this.rate*0.1+0.02-startcoord[2])*40)*0.35+0.65;
-
-          switchColor(this.foreground, alpha);
-
-          ctx.moveTo(startproject[0], startproject[1]);
-          ctx.lineTo(endproject[0],   endproject[1]  );
-
-          this.cache[this.offset].push(startproject, endproject, alpha)
-        }
-
-      } else {
-        var offsetcache = this.cache[this.offset];
-        for(var i = 0; i < offsetcache.length; i+=3){
-          switchColor(this.foreground, offsetcache[i+2])
-          ctx.moveTo(offsetcache[i][0], offsetcache[i][1]);
-          ctx.lineTo(offsetcache[i+1][0], offsetcache[i+1][1]);
-        }
+      for(var i = 0; i < offsetcache.length; i+=5){
+        switchColor(this.foreground, offsetcache[i+4])
+        ctx.moveTo(offsetcache[i], offsetcache[i+1]);
+        ctx.lineTo(offsetcache[i+2], offsetcache[i+3]);
       }
-
-    }
-
+    };
+    this.buffer();
   }
 
   function switchColor(color, alpha) {
@@ -125,18 +131,27 @@ function run() {
     ctx.beginPath();
   }
 
-  function getcoord(theta, that) {
-    return [theta*that.factor*Math.cos(theta+that.angleoffset),
-            that.rate*theta,
-            theta*that.factor*-Math.sin(theta+that.angleoffset)]
+  function getcoordx(theta, that) {
+    return theta*that.factor*Math.cos(theta+that.angleoffset)
+  }
+
+  function getcoordy(theta, that) {
+    return that.rate*theta
+  }
+
+  function getcoordz(theta, that) {
+    return theta*that.factor*-Math.sin(theta+that.angleoffset)
   }
 
   function getdtheta(theta, length, rate, factor){
     return length/Math.sqrt(rate*rate+factor*factor*theta*theta);
   }
 
-  function project(coord) {
-    return [xscreenoffset+xscreenscale*(coord[0]/(coord[2]-zcamera)),
-            yscreenoffset+yscreenscale*((coord[1]-ycamera)/(coord[2]-zcamera))]
+  function projectx(x,y,z) {
+    return xscreenoffset+xscreenscale*(x/(z-zcamera))
+  }
+
+  function projecty(x,y,z){
+    return yscreenoffset+yscreenscale*((y-ycamera)/(z-zcamera))
   }
 }
