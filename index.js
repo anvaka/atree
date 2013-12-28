@@ -17,7 +17,8 @@ function run() {
   var ctx = document.getElementById('scene').getContext('2d'),
     redSpiral = new Spiral({
       foreground: "#ff0000",
-      angleoffset: Math.PI
+      angleoffset: Math.PI,
+      factor: factor
     }),
     redSpiralShadow = new Spiral({
       foreground: "#660000",
@@ -32,6 +33,7 @@ function run() {
     cyanSpiral = new Spiral({
       foreground: "#00ffcc",
       angleoffset: 0,
+      factor: factor
     }),
     cyanSpiralShadow = new Spiral({
       foreground: "#003322",
@@ -66,48 +68,15 @@ function run() {
   }
 
   function Spiral(config) {
-    this.foreground = config.foreground;
-    this.angleoffset = config.angleoffset || 0;
     this.period = config.period || period;
     this.spacing = config.spacing || linespacing;
-    this.linelength = config.linelength || linelength;
     this.offset = 0;
     this.rate = config.rate || rate;
-    this.factor = config.factor || factor;
-    this.cache = {};
+    this.linelength = config.linelength || linelength;
 
-    this.buffer = function() {
-      var startx, starty, startz, endx, endy, endz, startpx, startpy, endpx, endpy, alpha, thetanew, tempcache, thetaold;
-      for (var offset = 0; offset > -this.period; offset--) {
-        tempcache = [];
-        for (var theta = thetamin + getdtheta(thetamin, offset * this.spacing / this.period, this.rate, this.factor); theta < thetamax; theta += getdtheta(theta, this.spacing, this.rate, this.factor)) {
-
-          thetaold = (theta >= thetamin) ? theta : thetamin;
-
-          startx = getcoordx(thetaold, this);
-          starty = getcoordy(thetaold, this);
-          startz = getcoordz(thetaold, this);
-          startpx = projectx(startx, starty, startz);
-          startpy = projecty(startx, starty, startz);
-
-          thetanew = theta + getdtheta(theta, this.linelength, this.rate, this.factor);
-          if (thetanew <= thetamin) {
-            continue;
-          }
-          endx = getcoordx(thetanew, this);
-          endy = getcoordy(thetanew, this);
-          endz = getcoordz(thetanew, this);
-          endpx = projectx(endx, endy, endz);
-          endpy = projecty(endx, endy, endz);
-
-          alpha = Math.atan((starty * this.factor / this.rate * 0.1 + 0.02 - startz) * 40) * 0.35 + 0.65;
-
-          tempcache.push(startpx, startpy, endpx, endpy, alpha)
-        }
-
-        this.cache[offset] = tempcache;
-      }
-    };
+    var angleoffset = config.angleoffset || 0;
+    var _factor = config.factor || factor;
+    var lineSegments = computeLineSegments.call(this);
 
     this.draw = function(ctx) {
       this.offset -= 1;
@@ -115,19 +84,41 @@ function run() {
         this.offset += this.period;
       }
 
-      var offsetcache = this.cache[this.offset];
-
-      for (var i = 0; i < offsetcache.length; i += 5) {
-        switchColor(this.foreground, offsetcache[i + 4]);
-        ctx.moveTo(offsetcache[i], offsetcache[i + 1]);
-        ctx.lineTo(offsetcache[i + 2], offsetcache[i + 3]);
-      }
+      lineSegments[this.offset].forEach(drawLineSegment);
     };
 
-    this.buffer();
+    function drawLineSegment(segment) {
+      stroke(config.foreground, segment.start.alpha);
+      ctx.moveTo(segment.start.x, segment.start.y);
+      ctx.lineTo(segment.end.x, segment.end.y);
+    }
+
+    function computeLineSegments() {
+      var lineSegments = {};
+      var factor = config.factor;
+      var thetanew, pointsAtOffset, thetaold, rate = this.rate;
+      for (var offset = 0; offset > -this.period; offset--) {
+        lineSegments[offset] = lines = [];
+        for (var theta = thetamin + getdtheta(thetamin, offset * this.spacing / this.period, rate, factor); theta < thetamax; theta += getdtheta(theta, this.spacing, rate, factor)) {
+          thetaold = (theta >= thetamin) ? theta : thetamin;
+          thetanew = theta + getdtheta(theta, this.linelength, rate, factor);
+
+          if (thetanew <= thetamin) {
+            continue;
+          }
+
+          lines.push({
+            start: getPointByAngle(thetaold, factor, angleoffset, rate),
+            end: getPointByAngle(thetanew, factor, angleoffset, rate)
+          });
+        }
+      }
+
+      return lineSegments;
+    }
   }
 
-  function switchColor(color, alpha) {
+  function stroke(color, alpha) {
     ctx.closePath();
     ctx.stroke();
     ctx.strokeStyle = color;
@@ -135,28 +126,27 @@ function run() {
     ctx.beginPath();
   }
 
-  function getcoordx(theta, that) {
-    return theta * that.factor * Math.cos(theta + that.angleoffset);
-  }
+  function getPointByAngle(theta, factor, angleoffset, rate) {
+    var x = theta * factor *  Math.cos(theta + angleoffset);
+    var z = - theta * factor * Math.sin(theta + angleoffset);
+    var y = rate * theta;
+    // now that we have 3d coorinates, project them into 2d space:
+    var point = projectTo2d(x, y, z);
+    // calculate point's color alpha level:
+    point.alpha = Math.atan((y * factor / rate * 0.1 + 0.02 - z) * 40) * 0.35 + 0.65;
 
-  function getcoordy(theta, that) {
-    return that.rate * theta;
-  }
-
-  function getcoordz(theta, that) {
-    return theta * that.factor * -Math.sin(theta + that.angleoffset)
+    return point;
   }
 
   function getdtheta(theta, length, rate, factor) {
     return length / Math.sqrt(rate * rate + factor * factor * theta * theta);
   }
 
-  function projectx(x, y, z) {
-    return xscreenoffset + xscreenscale * (x / (z - zcamera));
-  }
-
-  function projecty(x, y, z) {
-    return yscreenoffset + yscreenscale * ((y - ycamera) / (z - zcamera));
+  function projectTo2d(x, y, z) {
+    return {
+      x: xscreenoffset + xscreenscale * (x / (z - zcamera)),
+      y: yscreenoffset + yscreenscale * ((y - ycamera) / (z - zcamera))
+    };
   }
 
   // I actually want it to be slower then 60fps
