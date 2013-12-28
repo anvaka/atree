@@ -26,7 +26,7 @@ function run() {
       factor: 0.93 * factor
     }),
     redSpiralShadow2 = new Spiral({
-      foreground: "#440000",
+      foreground: "#220000",
       angleoffset: Math.PI * 0.92,
       factor: 0.90 * factor
     }),
