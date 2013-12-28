@@ -67,10 +67,7 @@ function run() {
   }
 
   function Spiral(config) {
-    /* config should have speed, sign, foreground, background  
-    */
     this.foreground = config.foreground;
-    this.background = config.background;
     this.angleoffset = config.angleoffset || 0;
     this.period = config.period || period;
     this.spacing = config.spacing || linespacing;
@@ -78,26 +75,43 @@ function run() {
     this.offset = 0;
     this.rate = config.rate || rate;
     this.factor = config.factor || factor;
+    this.cache = {};
     this.draw = function(ctx) {
-      var startcoord, startproject, endcoord, endproject;
+      var startcoord, startproject, endcoord, endproject, alpha;
 
       this.offset -= 1;
       if (this.offset<0)
         this.offset += this.period;
 
-      for (var theta=getdtheta(0, this.offset*this.spacing/this.period); theta<thetamax; theta+=getdtheta(theta, this.spacing)){
+      if (!this.cache[this.offset]){
+        this.cache[this.offset] = [];
+        for (var theta=getdtheta(0, this.offset*this.spacing/this.period, this.rate, this.factor); theta<thetamax; theta+=getdtheta(theta, this.spacing, this.rate, this.factor)){
 
-        startcoord   = getcoord(theta, this);
-        startproject = project(startcoord);
+          startcoord   = getcoord(theta, this);
+          startproject = project(startcoord);
 
-        endcoord     = getcoord(theta+getdtheta(theta, this.linelength), this);
-        endproject   = project(endcoord);
+          endcoord     = getcoord(theta+getdtheta(theta, this.linelength, this.rate, this.factor), this);
+          endproject   = project(endcoord);
 
-        switchColor(this.foreground, Math.atan((startcoord[1]*this.factor/this.rate*0.1+0.02-startcoord[2])*40)*0.35+0.65);
+          alpha = Math.atan((startcoord[1]*this.factor/this.rate*0.1+0.02-startcoord[2])*40)*0.35+0.65;
 
-        ctx.moveTo(startproject[0], startproject[1]);
-        ctx.lineTo(endproject[0],   endproject[1]  );
+          switchColor(this.foreground, alpha);
+
+          ctx.moveTo(startproject[0], startproject[1]);
+          ctx.lineTo(endproject[0],   endproject[1]  );
+
+          this.cache[this.offset].push(startproject, endproject, alpha)
+        }
+
+      } else {
+        var offsetcache = this.cache[this.offset];
+        for(var i = 0; i < offsetcache.length; i+=3){
+          switchColor(this.foreground, offsetcache[i+2])
+          ctx.moveTo(offsetcache[i][0], offsetcache[i][1]);
+          ctx.lineTo(offsetcache[i+1][0], offsetcache[i+1][1]);
+        }
       }
+
     }
 
   }
@@ -116,21 +130,9 @@ function run() {
             that.rate*theta,
             theta*that.factor*-Math.sin(theta+that.angleoffset)]
   }
-  /*var getdtheta = (function(){
-    var a = rate;
-    var b = Math.pow(factor, 2)/2/rate;
-    return function (theta, length){
-      return length/(a+b*Math.pow(theta, 2)); //Math.sqrt(Math.pow(rate,2)+Math.pow((factor*theta),2));
-    }
-  })()*/
-  var cache = {}
-  function getdtheta(theta, length){
-    if (cache[length] === undefined)
-      cache[length] = {};
-    else if (cache[length][theta]!==undefined)
-      return cache[length][theta];
-    else
-      return cache[length][theta]=length/Math.sqrt(rate*rate+factor*factor*theta*theta);
+
+  function getdtheta(theta, length, rate, factor){
+    return length/Math.sqrt(rate*rate+factor*factor*theta*theta);
   }
 
   function project(coord) {
