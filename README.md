@@ -13,16 +13,21 @@ The tree is built of two spirals. These [11 lines of code](https://github.com/an
 
 ![spiral](http://upload.wikimedia.org/wikipedia/commons/a/a5/ComplexSinInATimeAxe.gif)
 
-I tried to replicate original animated gif of a tree, but...
+It's almost perfect now
+-----------------------
 
-It's not perfect yet
---------------------
-Want to help make it better? There are small things which are not perfect:
+**EDIT:** Thank you reddit. With your help we made it almost perfect. You are awesome! 
 
-* I do not properly mimic spiral's curvature at the top of the tree
-* Colors need to change more gradually, depending on Z coordinate
+Huge appreciation goes to [@CensoredUsername](https://github.com/CensoredUsername) who made [significant improvement](http://www.reddit.com/r/programming/comments/1tswai/t_sin_t_christmas_tree/cebhvu9). 
+
+[@Yazuak](https://github.com/Yazuak) first gave and implemented [idea](http://www.reddit.com/r/programming/comments/1tswai/t_sin_t_christmas_tree/cebajpt) of how to manage even distribution of points along the curves.
+
+Vitaliy Kaurov implemented the same tree in Wolfram language... in just [15 lines of code](http://community.wolfram.com/groups/-/m/t/175891).
+
+So, what's left? Just small changes which could make this tree perfect:
+
 * Shadows are not accurate
-* I think code is more complex than it should be.
+* I think code is more complex than it should be (subjective).
 
 # Happy Holidays!
 
