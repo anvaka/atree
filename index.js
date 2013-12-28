@@ -42,14 +42,13 @@ function run() {
       foreground: "#002211",
       angleoffset: -Math.PI * 0.08,
       factor: 0.90 * factor
-    })
+    });
 
+  render();
 
-    animationLoop();
-
-
-  function animationLoop() {
-    window.setInterval(renderFrame, 1000 / 24);
+  function render() {
+    requestAnimationFrame(render);
+    renderFrame();
   }
 
   function renderFrame() {
@@ -92,8 +91,9 @@ function run() {
           startpy = projecty(startx, starty, startz);
 
           thetanew = theta + getdtheta(theta, this.linelength, this.rate, this.factor);
-          if (thetanew <= thetamin)
+          if (thetanew <= thetamin) {
             continue;
+          }
           endx = getcoordx(thetanew, this);
           endy = getcoordy(thetanew, this);
           endz = getcoordz(thetanew, this);
@@ -107,25 +107,27 @@ function run() {
         this.cache[offset] = new Float32Array(tempcache);
       }
     };
+
     this.draw = function(ctx) {
       this.offset -= 1;
-      if (this.offset <= -this.period)
+      if (this.offset <= -this.period) {
         this.offset += this.period;
+      }
 
       var offsetcache = this.cache[this.offset];
 
       for (var i = 0; i < offsetcache.length; i += 5) {
-        switchColor(this.foreground, offsetcache[i + 4])
+        switchColor(this.foreground, offsetcache[i + 4]);
         ctx.moveTo(offsetcache[i], offsetcache[i + 1]);
         ctx.lineTo(offsetcache[i + 2], offsetcache[i + 3]);
       }
     };
+
     this.buffer();
   }
 
   function switchColor(color, alpha) {
     ctx.closePath();
-    //ctx.lineWidth = 2;
     ctx.stroke();
     ctx.strokeStyle = color;
     ctx.globalAlpha = alpha;
@@ -133,11 +135,11 @@ function run() {
   }
 
   function getcoordx(theta, that) {
-    return theta * that.factor * Math.cos(theta + that.angleoffset)
+    return theta * that.factor * Math.cos(theta + that.angleoffset);
   }
 
   function getcoordy(theta, that) {
-    return that.rate * theta
+    return that.rate * theta;
   }
 
   function getcoordz(theta, that) {
@@ -149,10 +151,15 @@ function run() {
   }
 
   function projectx(x, y, z) {
-    return xscreenoffset + xscreenscale * (x / (z - zcamera))
+    return xscreenoffset + xscreenscale * (x / (z - zcamera));
   }
 
   function projecty(x, y, z) {
-    return yscreenoffset + yscreenscale * ((y - ycamera) / (z - zcamera))
+    return yscreenoffset + yscreenscale * ((y - ycamera) / (z - zcamera));
+  }
+
+  // I actually want it to be slower then 60fps
+  function requestAnimationFrame(callback) {
+    window.setTimeout(callback, 1000 / 24);
   }
 }
