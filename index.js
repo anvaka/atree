@@ -104,7 +104,8 @@ function run() {
 
           tempcache.push(startpx, startpy, endpx, endpy, alpha)
         }
-        this.cache[offset] = new Float32Array(tempcache);
+
+        this.cache[offset] = tempcache;
       }
     };
 
