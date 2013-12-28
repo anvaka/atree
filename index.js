@@ -9,6 +9,7 @@ var thetamin = 0,
     yscreenscale = 360,
     ycamera = 2,
     zcamera = -3,
+    fps = 24,
 
     rate = 1/(2*Math.PI), // every rotation y gets one bigger
     factor = rate/3;
@@ -45,11 +46,16 @@ function run() {
     })
 
 
-  animationLoop();
+  requestAnimationFrame(animationLoop);
 
-
-  function animationLoop() {
-    window.setInterval(renderFrame, 1000 / 24);
+  function animationLoop(step) {
+    renderFrame();
+    if (step>1000/fps)
+      window.setTimeout(function(){
+        requestAnimationFrame(animationLoop);
+      }, 1000/fps-step);
+    else
+      requestAnimationFrame(animationLoop);
   }
 
   function renderFrame() {
