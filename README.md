@@ -27,7 +27,7 @@ Vitaliy Kaurov implemented the same tree in Wolfram language... in just [15 line
 So, what's left? Just small changes which could make this tree perfect:
 
 * Shadows are not accurate
-* I think code is more complex than it should be (subjective).
+* I think code is more complex than it should be (subjectively).
 
 # Happy Holidays!
 
