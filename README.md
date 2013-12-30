@@ -13,6 +13,13 @@ The tree is built of two spirals. These [11 lines of code](https://github.com/an
 
 ![spiral](http://upload.wikimedia.org/wikipedia/commons/a/a5/ComplexSinInATimeAxe.gif)
 
+How to compile it?
+------------------
+You need CoffeeScript
+http://github.com/jashkenas/coffee-script
+and then run
+        coffee -cj js/all.js js/tree.coffee
+
 It's almost perfect now
 -----------------------
 
