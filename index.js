@@ -68,19 +68,15 @@ function run() {
   }
 
   function Spiral(config) {
-    this.period = config.period || period;
-    this.spacing = config.spacing || linespacing;
     this.offset = 0;
-    this.rate = config.rate || rate;
-    this.linelength = config.linelength || linelength;
 
-    var angleoffset = config.angleoffset || 0;
-    var lineSegments = computeLineSegments.call(this);
+    var angleoffset = config.angleoffset;
+    var lineSegments = computeLineSegments(this);
 
     this.draw = function(ctx) {
       this.offset -= 1;
-      if (this.offset <= -this.period) {
-        this.offset += this.period;
+      if (this.offset <= -period) {
+        this.offset += period;
       }
 
       lineSegments[this.offset].forEach(drawLineSegment);
@@ -95,12 +91,12 @@ function run() {
     function computeLineSegments() {
       var lineSegments = {};
       var factor = config.factor;
-      var thetanew, pointsAtOffset, thetaold, rate = this.rate;
-      for (var offset = 0; offset > -this.period; offset--) {
+      var thetanew, pointsAtOffset, thetaold;
+      for (var offset = 0; offset > -period; offset--) {
         lineSegments[offset] = lines = [];
-        for (var theta = thetamin + getdtheta(thetamin, offset * this.spacing / this.period, rate, factor); theta < thetamax; theta += getdtheta(theta, this.spacing, rate, factor)) {
+        for (var theta = thetamin + getdtheta(thetamin, offset * linespacing / period, rate, factor); theta < thetamax; theta += getdtheta(theta, linespacing, rate, factor)) {
           thetaold = (theta >= thetamin) ? theta : thetamin;
-          thetanew = theta + getdtheta(theta, this.linelength, rate, factor);
+          thetanew = theta + getdtheta(theta, linelength, rate, factor);
 
           if (thetanew <= thetamin) {
             continue;
@@ -137,8 +133,8 @@ function run() {
     return point;
   }
 
-  function getdtheta(theta, length, rate, factor) {
-    return length / Math.sqrt(rate * rate + factor * factor * theta * theta);
+  function getdtheta(theta, lineLength, rate, factor) {
+    return lineLength / Math.sqrt(rate * rate + factor * factor * theta * theta);
   }
 
   function projectTo2d(x, y, z) {
