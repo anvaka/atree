@@ -1,22 +1,25 @@
-thetamin = 0
-thetamax = 6 * Math.PI
-period = 5
-linespacing = 1 / 30
-linelength = linespacing / 2
-yscreenoffset = 300
-xscreenoffset = 260
-xscreenscale = 360
-yscreenscale = 360
-ycamera = 2
-zcamera = -3
-rate = 1 / (2 * Math.PI)
-factor = rate / 3
-
 class Spiral
+  period = 5
+  thetamin = 0
+  thetamax = 6 * Math.PI
+  rate = 1 / (2 * Math.PI)
+  factor = rate / 3
+
+  linespacing = 1 / 30
+  linelength = linespacing / 2
+
+  xscreenoffset = 260
+  yscreenoffset = 300
+  xscreenscale = 360
+  yscreenscale = 360
+
+  ycamera = 2
+  zcamera = -3
+
   constructor: (@foreground, @angleoffset, @factor, config = {}) ->
     @period = config.period || period
-    @spacing = config.spacing || linespacing
-    @rate = config.rate || rate
+    @spacing = config.spacing || 1 / 30
+    @rate = config.rate || 1 / (2 * Math.PI)
     @offset = 0
     @linelength = config.linelength || linelength
     @lineSegments = computeLineSegments(@)
@@ -71,35 +74,3 @@ class Spiral
 
   getdtheta = (theta, lineLength, rate, factor) ->
     lineLength / Math.sqrt(rate * rate + factor * factor * theta * theta)
-
-class Tree
-  constructor: (elem, config) ->
-    @elem = document.getElementById(elem)
-    @ctx = @elem.getContext '2d'
-
-    @spirals = [
-      new Spiral '#ff0000', Math.PI, factor
-      new Spiral '#660000', Math.PI * 0.95, factor * 0.93
-      new Spiral '#220000', Math.PI * 0.92, factor * 0.9
-      new Spiral '#00ffcc', 0, factor
-      new Spiral '#003322', -Math.PI * 0.05, factor * 0.93
-      new Spiral '#002211', -Math.PI * 0.08, factor * 0.9
-    ]
-
-  run: ->
-    @render()
-
-  render: =>
-    @requestAnimationFrame()
-    @renderFrame()
-
-  renderFrame: ->
-    @ctx.clearRect 0, 0, 500, 500
-    @ctx.beginPath()
-    spiral.render @ctx for spiral in @spirals
-
-  requestAnimationFrame: ->
-    window.setTimeout(@render, 1000 / 24)
-
-tree = new Tree 'scene', {}
-tree.run()
