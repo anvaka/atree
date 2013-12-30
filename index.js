@@ -68,18 +68,17 @@ function run() {
   }
 
   function Spiral(config) {
-    this.offset = 0;
-
+    var offset = 0;
     var angleoffset = config.angleoffset;
     var lineSegments = computeLineSegments(this);
 
     this.draw = function(ctx) {
-      this.offset -= 1;
-      if (this.offset <= -period) {
-        this.offset += period;
+      offset -= 1;
+      if (offset <= -period) {
+        offset += period;
       }
 
-      lineSegments[this.offset].forEach(drawLineSegment);
+      lineSegments[offset].forEach(drawLineSegment);
     };
 
     function drawLineSegment(segment) {
@@ -91,7 +90,7 @@ function run() {
     function computeLineSegments() {
       var lineSegments = {};
       var factor = config.factor;
-      var thetanew, pointsAtOffset, thetaold;
+      var thetanew, thetaold;
       for (var offset = 0; offset > -period; offset--) {
         lineSegments[offset] = lines = [];
         for (var theta = thetamin + getdtheta(thetamin, offset * linespacing / period, rate, factor); theta < thetamax; theta += getdtheta(theta, linespacing, rate, factor)) {
