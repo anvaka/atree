@@ -15,64 +15,57 @@ var thetamin = 0,
 
 function run() {
   var ctx = document.getElementById('scene').getContext('2d'),
-    redSpiral = new Spiral({
-      foreground: "#ff0000",
-      angleoffset: Math.PI,
-      factor: factor
-    }),
-    redSpiralShadow = new Spiral({
-      foreground: "#660000",
-      angleoffset: Math.PI * 0.95,
-      factor: 0.93 * factor
-    }),
-    redSpiralShadow2 = new Spiral({
-      foreground: "#220000",
-      angleoffset: Math.PI * 0.92,
-      factor: 0.90 * factor
-    }),
-    cyanSpiral = new Spiral({
-      foreground: "#00ffcc",
-      angleoffset: 0,
-      factor: factor
-    }),
-    cyanSpiralShadow = new Spiral({
-      foreground: "#003322",
-      angleoffset: -Math.PI * 0.05,
-      factor: 0.93 * factor
-    }),
-    cyanSpiralShadow2 = new Spiral({
-      foreground: "#002211",
-      angleoffset: -Math.PI * 0.08,
-      factor: 0.90 * factor
-    });
+      spirals = [
+        new Spiral({
+          foreground: "#220000", // Second shadow for red spiral
+          angleoffset: Math.PI * 0.92,
+          factor: 0.90 * factor
+        }),
+        new Spiral({
+          foreground: "#002211", // Second shadow for cyan spiral
+          angleoffset: -Math.PI * 0.08,
+          factor: 0.90 * factor
+        }),
+        new Spiral({
+          foreground: "#660000", // red spiral shadow
+          angleoffset: Math.PI * 0.95,
+          factor: 0.93 * factor
+        }),
+        new Spiral({
+          foreground: "#003322", // cyan spiral shadow
+          angleoffset: -Math.PI * 0.05,
+          factor: 0.93 * factor
+        }),
+        new Spiral({
+          foreground: "#ff0000", // red Spiral
+          angleoffset: Math.PI,
+          factor: factor
+        }),
+        new Spiral({
+          foreground: "#00ffcc", // cyan spiral
+          angleoffset: 0,
+          factor: factor
+        })];
 
-  render();
-
-  function render() {
-    requestAnimationFrame(render);
-    renderFrame();
-  }
+  renderFrame(); // animation loop starts here
 
   function renderFrame() {
+    requestAnimationFrame(renderFrame);
+
     ctx.clearRect(0, 0, 500, 500);
     ctx.beginPath();
+    spirals.forEach(renderSpiral);
+  }
 
-    redSpiralShadow2.draw(ctx);
-    cyanSpiralShadow2.draw(ctx);
-
-    redSpiralShadow.draw(ctx);
-    cyanSpiralShadow.draw(ctx);
-
-    redSpiral.draw(ctx);
-    cyanSpiral.draw(ctx);
+  function renderSpiral(spiral) {
+    spiral.render(ctx);
   }
 
   function Spiral(config) {
     var offset = 0;
-    var angleoffset = config.angleoffset;
-    var lineSegments = computeLineSegments(this);
+    var lineSegments = computeLineSegments();
 
-    this.draw = function(ctx) {
+    this.render = function(ctx) {
       offset -= 1;
       if (offset <= -period) {
         offset += period;
@@ -102,8 +95,8 @@ function run() {
           }
 
           lines.push({
-            start: getPointByAngle(thetaold, factor, angleoffset, rate),
-            end: getPointByAngle(thetanew, factor, angleoffset, rate)
+            start: getPointByAngle(thetaold, factor, config.angleoffset, rate),
+            end: getPointByAngle(thetanew, factor, config.angleoffset, rate)
           });
         }
       }
