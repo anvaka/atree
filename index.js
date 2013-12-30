@@ -75,7 +75,6 @@ function run() {
     this.linelength = config.linelength || linelength;
 
     var angleoffset = config.angleoffset || 0;
-    var _factor = config.factor || factor;
     var lineSegments = computeLineSegments.call(this);
 
     this.draw = function(ctx) {
