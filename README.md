@@ -16,8 +16,11 @@ The tree is built of two spirals. These [11 lines of code](https://github.com/an
 How to compile it?
 ------------------
 You need CoffeeScript
+
 http://github.com/jashkenas/coffee-script
+
 and then run
+
         coffee -cj js/all.js js/tree.coffee
 
 It's almost perfect now
