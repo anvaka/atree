@@ -133,7 +133,7 @@
   })();
 
   Tree = (function() {
-    var height, period, spiralWithShadow, width;
+    var colors, height, period, spiralWithShadow, width;
 
     period = 5;
 
@@ -141,7 +141,10 @@
 
     height = 500;
 
+    colors = ['#ff0000', '#00ff00', '#ffffff', '#d4a017'];
+
     function Tree(elem, config) {
+      var color, dtheta, i, _i, _len;
       this.elem = document.getElementById(elem);
       this.width = config.width || width;
       this.height = config.height || height;
@@ -149,7 +152,12 @@
       this.elem.setAttribute('width', "" + this.width + "px");
       this.elem.setAttribute('height', "" + this.height + "px");
       this.ctx = this.elem.getContext('2d');
-      this.spirals = [new Spiral('#ff0000', Math.PI, period), new Spiral('#00ffcc', 0, period)];
+      this.spirals = [];
+      dtheta = Math.PI * 2 / colors.length;
+      for (i = _i = 0, _len = colors.length; _i < _len; i = ++_i) {
+        color = colors[i];
+        this.spirals.push(new Spiral(color, dtheta * i, period));
+      }
     }
 
     Tree.prototype.run = function() {

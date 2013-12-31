@@ -3,6 +3,8 @@ class Tree
   width = 500
   height = 500
 
+  colors = ['#ff0000', '#00ff00', '#ffffff', '#d4a017']
+
   constructor: (elem, config) ->
     @elem = document.getElementById elem
     @width = config.width or width
@@ -13,10 +15,10 @@ class Tree
 
     @ctx = @elem.getContext '2d'
 
-    @spirals = [
-      new Spiral '#ff0000', Math.PI, period
-      new Spiral '#00ffcc', 0, period
-    ]
+    @spirals = []
+    dtheta = Math.PI * 2 / colors.length
+    for color, i in colors
+      @spirals.push new Spiral color, dtheta * i, period
 
   run: ->
     @requestAnimationFrame()
