@@ -2,8 +2,20 @@ class Tree
   period = 5
   width = 500
   height = 500
+  colors = [
+    '#ff0000',
+    '#d4a017',
+    '#00ff00',
+    '#ffffff',
+  ]
+  screenConfig =
+    xscreenoffset: 260
+    yscreenoffset: 300
+    xscreenscale: 360
+    yscreenscale: 360
+    ycamera: 2
+    zcamera: -3
 
-  colors = ['#ff0000', '#00ff00', '#ffffff', '#d4a017']
 
   constructor: (elem, config) ->
     @elem = document.getElementById elem
@@ -12,6 +24,7 @@ class Tree
     @offset = 0
     @elem.setAttribute 'width', "#{@width}px"
     @elem.setAttribute 'height',"#{@height}px"
+    @projection = new Projection screenConfig
 
     @ctx = @elem.getContext '2d'
 
@@ -33,10 +46,12 @@ class Tree
       @renderObject spiral.lineSegments(@offset)
 
   renderObject: (segments) ->
-    for segment in segments
-      @stroke segment.color, segment.start.alpha
-      @ctx.moveTo segment.start.x, segment.start.y
-      @ctx.lineTo segment.end.x, segment.end.y
+    for s in segments
+      start = @projection.to2d s.start.x, s.start.y, s.start.z
+      end  =  @projection.to2d s.end.x, s.end.y, s.end.z
+      @stroke s.color, s.start.alpha
+      @ctx.moveTo start.x, start.y
+      @ctx.lineTo end.x, end.y
 
   stroke: (color, alpha) ->
     @ctx.closePath()

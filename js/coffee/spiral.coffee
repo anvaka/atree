@@ -7,14 +7,6 @@ class Spiral
   linespacing = 1 / 30
   linelength = linespacing / 2
 
-  xscreenoffset = 260
-  yscreenoffset = 300
-  xscreenscale = 360
-  yscreenscale = 360
-
-  ycamera = 2
-  zcamera = -3
-
   class SpiralShadow
     constructor: (@offset, @factor_rate, @color_rate) ->
 
@@ -59,13 +51,10 @@ class Spiral
     x = theta * factor * Math.cos(theta + offset)
     y = rate * theta
     z = - theta * factor * Math.sin(theta + offset)
-    point = projectTo2d(x, y, z)
-    point.alpha = Math.atan((y * factor / rate * 0.1 + 0.02 - z) * 40) * 0.35 + 0.65
-    point
-
-  projectTo2d = (x, y, z) ->
-    x: xscreenoffset + xscreenscale * (x / (z - zcamera))
-    y: yscreenoffset + yscreenscale * ((y - ycamera) / (z - zcamera))
+    x: x
+    y: y
+    z: z
+    alpha: Math.atan((y * factor / rate * 0.1 + 0.02 - z) * 40) * 0.35 + 0.65
 
   getdtheta = (theta, lineLength, rate, factor) ->
     lineLength / Math.sqrt(rate * rate + factor * factor * theta * theta)
