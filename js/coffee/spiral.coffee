@@ -1,5 +1,4 @@
 class Spiral
-  period = 5
   thetamin = 0
   thetamax = 6 * Math.PI
   rate = 1 / (2 * Math.PI)
@@ -16,47 +15,43 @@ class Spiral
   ycamera = 2
   zcamera = -3
 
-  constructor: (@foreground, @angleoffset, @factor, config = {}) ->
-    @period = config.period || period
-    @spacing = config.spacing || 1 / 30
-    @rate = config.rate || 1 / (2 * Math.PI)
+  class SpiralShadow
+    constructor: (@offset, @factor_rate, @color_rate) ->
+
+  spiralShadows = [
+    new SpiralShadow 0, 1, 0
+    new SpiralShadow Math.PI * 0.05, 0.93, -0.7
+    new SpiralShadow Math.PI * 0.08, 0.9, -0.85
+  ]
+
+  constructor: (@foreground, @angleoffset, @period, config = {}) ->
+    @spacing = config.spacing or 1 / 30
+    @rate = config.rate or 1 / (2 * Math.PI)
     @offset = 0
-    @linelength = config.linelength || linelength
-    @lineSegments = computeLineSegments(@)
+    @factor = config.factor or factor
+    @linelength = config.linelength or linelength
+    @computedLineSegments = computeLineSegments(@)
 
-  render: (ctx) ->
-    @offset -= 1
-    @offset += @period if @offset <= -@period
-    for lineSegment in @lineSegments[@offset]
-      @drawLineSegment ctx, lineSegment
-
-  drawLineSegment: (ctx, segment) ->
-    stroke ctx, @foreground, segment.start.alpha
-    ctx.moveTo(segment.start.x, segment.start.y)
-    ctx.lineTo(segment.end.x, segment.end.y)
-
-  stroke = (ctx, color, alpha) ->
-    ctx.closePath()
-    ctx.stroke()
-    ctx.strokeStyle = color
-    ctx.globalAlpha = alpha
-    ctx.beginPath()
+  lineSegments: (offset) ->
+    @computedLineSegments[offset]
 
   computeLineSegments = (s) ->
     lineSegments = {}
     offset = 0
     while offset > -s.period
       lineSegments[offset] = lines = []
-      theta = thetamin + getdtheta(thetamin, offset * s.spacing / s.period, s.rate, s.factor)
-      while theta < thetamax
-        inc = getdtheta(theta, linespacing, rate, factor)
-        thetaold = if theta >= thetamin then theta else thetamin
-        thetanew = theta + getdtheta(theta, linelength, rate, factor)
-        theta += inc
-        continue if thetanew <= thetamin
-        lines.push
-          start : getPointByAngle(thetaold, s.factor, s.angleoffset, s.rate)
-          end:    getPointByAngle(thetanew, s.factor, s.angleoffset, s.rate)
+      for spiralShadow in spiralShadows
+        theta  = thetamin + getdtheta(thetamin, offset * s.spacing / s.period, s.rate, s.factor * spiralShadow.factor_rate)
+        while theta < thetamax
+          inc = getdtheta(theta, linespacing, rate, factor)
+          thetaold = if theta >= thetamin then theta else thetamin
+          thetanew = theta + getdtheta(theta, linelength, rate, factor)
+          theta += inc
+          continue if thetanew <= thetamin
+          lines.push
+            start : getPointByAngle(thetaold, s.factor * spiralShadow.factor_rate, s.angleoffset - spiralShadow.offset, s.rate)
+            end:    getPointByAngle(thetanew, s.factor * spiralShadow.factor_rate, s.angleoffset - spiralShadow.offset, s.rate)
+            color:  shapeColor s.foreground, spiralShadow.color_rate
       offset--
     lineSegments
 
@@ -74,3 +69,15 @@ class Spiral
 
   getdtheta = (theta, lineLength, rate, factor) ->
     lineLength / Math.sqrt(rate * rate + factor * factor * theta * theta)
+
+  shapeColor = (hex, lum) ->
+    hex = String(hex).replace(/[^0-9a-f]/g, "")
+    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2]  if hex.length < 6
+    lum = lum or 0
+    rgb = "#"
+    i = 0
+    for i in [0...3]
+      c = parseInt(hex.substr(i * 2, 2), 16)
+      c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16)
+      rgb += ("00" + c).substr(c.length)
+    rgb

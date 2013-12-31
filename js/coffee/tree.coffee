@@ -1,34 +1,54 @@
 class Tree
-  rate = 1 / (2 * Math.PI)
-  factor = rate / 3
+  period = 5
+  width = 500
+  height = 500
 
   constructor: (elem, config) ->
-    @elem = document.getElementById(elem)
+    @elem = document.getElementById elem
+    @width = config.width or width
+    @height = config.height or height
+    @offset = 0
+    @elem.setAttribute 'width', "#{@width}px"
+    @elem.setAttribute 'height',"#{@height}px"
+
     @ctx = @elem.getContext '2d'
 
     @spirals = [
-      new Spiral '#ff0000', Math.PI, factor
-      new Spiral '#660000', Math.PI * 0.95, factor * 0.93
-      new Spiral '#220000', Math.PI * 0.92, factor * 0.9
-      new Spiral '#00ffcc', 0, factor
-      new Spiral '#003322', -Math.PI * 0.05, factor * 0.93
-      new Spiral '#002211', -Math.PI * 0.08, factor * 0.9
+      new Spiral '#ff0000', Math.PI, period
+      new Spiral '#00ffcc', 0, period
     ]
 
   run: ->
-    @render()
-
-  render: =>
     @requestAnimationFrame()
     @renderFrame()
 
   renderFrame: ->
-    @ctx.clearRect 0, 0, 500, 500
+    @ctx.clearRect 0, 0, @width, @height
     @ctx.beginPath()
-    spiral.render @ctx for spiral in @spirals
+    @offset -= 1
+    @offset += period if @offset <= -period
+    for spiral in @spirals
+      @renderObject spiral.lineSegments(@offset)
+
+  renderObject: (segments) ->
+    for segment in segments
+      @stroke segment.color, segment.start.alpha
+      @ctx.moveTo segment.start.x, segment.start.y
+      @ctx.lineTo segment.end.x, segment.end.y
+
+  stroke: (color, alpha) ->
+    @ctx.closePath()
+    @ctx.stroke()
+    @ctx.strokeStyle = color
+    @ctx.globalAlpha = alpha
+    @ctx.beginPath()
 
   requestAnimationFrame: ->
-    window.setTimeout(@render, 1000 / 24)
+    window.setTimeout( =>
+      @run()
+    , 1000 / 24)
+
+  spiralWithShadow = (color, period, offset) ->
 
 tree = new Tree 'scene', {}
 tree.run()
