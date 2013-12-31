@@ -1,6 +1,5 @@
 #= require Projection
 #= require Spiral
-
 class Tree
   period = 5
   width = 500
@@ -67,3 +66,6 @@ class Tree
     window.setTimeout( =>
       @run()
     , 1000 / 24)
+
+tree = new Tree 'scene', {}
+tree.run()

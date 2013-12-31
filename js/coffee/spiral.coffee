@@ -1,4 +1,4 @@
-class Spiral
+class Spiral extends DrawableObject
   thetamin = 0
   thetamax = 6 * Math.PI
   rate = 1 / (2 * Math.PI)
@@ -22,18 +22,15 @@ class Spiral
     @offset = 0
     @factor = config.factor or factor
     @linelength = config.linelength or linelength
-    @computedLineSegments = computeLineSegments(@)
+    super
 
-  lineSegments: (offset) ->
-    @computedLineSegments[offset]
-
-  computeLineSegments = (s) ->
+  computeLineSegments: ->
     lineSegments = {}
     offset = 0
-    while offset > -s.period
+    while offset > -@period
       lineSegments[offset] = lines = []
-      for spiralShadow in spiralShadows
-        theta  = thetamin + getdtheta(thetamin, offset * s.spacing / s.period, s.rate, s.factor * spiralShadow.factor_rate)
+      for shadow in spiralShadows
+        theta  = thetamin + getdtheta(thetamin, offset * @spacing / @period, @rate, @factor * shadow.factor_rate)
         while theta < thetamax
           inc = getdtheta(theta, linespacing, rate, factor)
           thetaold = if theta >= thetamin then theta else thetamin
@@ -41,9 +38,9 @@ class Spiral
           theta += inc
           continue if thetanew <= thetamin
           lines.push
-            start : getPointByAngle(thetaold, s.factor * spiralShadow.factor_rate, s.angleoffset - spiralShadow.offset, s.rate)
-            end:    getPointByAngle(thetanew, s.factor * spiralShadow.factor_rate, s.angleoffset - spiralShadow.offset, s.rate)
-            color:  shapeColor s.foreground, spiralShadow.color_rate
+            start : getPointByAngle(thetaold, @factor * shadow.factor_rate, @angleoffset - shadow.offset, @rate)
+            end:    getPointByAngle(thetanew, @factor * shadow.factor_rate, @angleoffset - shadow.offset, @rate)
+            color:  shapeColor @foreground, shadow.color_rate
       offset--
     lineSegments
 
