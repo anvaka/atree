@@ -7,13 +7,18 @@ class Spiral extends DrawableObject
   linespacing = 1 / 30
   linelength = linespacing / 2
 
-  class SpiralShadow
-    constructor: (@offset, @factor_rate, @color_rate) ->
-
   spiralShadows = [
-    new SpiralShadow 0, 1, 0
-    new SpiralShadow Math.PI * 0.05, 0.93, -0.7
-    new SpiralShadow Math.PI * 0.08, 0.9, -0.85
+    offset: 0
+    factor_rate: 1
+    color_rate: 0
+  ,
+    offset: Math.PI * 0.05
+    factor_rate: 0.93
+    color_rate: -0.7
+  ,
+    offset: Math.PI * 0.08
+    factor_rate: 0.9
+    color_rate: -0.85
   ]
 
   constructor: (@foreground, @angleoffset, @period, config = {}) ->
