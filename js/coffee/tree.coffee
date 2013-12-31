@@ -65,7 +65,5 @@ class Tree
       @run()
     , 1000 / 24)
 
-  spiralWithShadow = (color, period, offset) ->
-
 tree = new Tree 'scene', {}
 tree.run()

@@ -152,7 +152,7 @@
   })();
 
   Tree = (function() {
-    var colors, height, period, screenConfig, spiralWithShadow, width;
+    var colors, height, period, screenConfig, width;
 
     period = 5;
 
@@ -239,8 +239,6 @@
         return _this.run();
       }, 1000 / 24);
     };
-
-    spiralWithShadow = function(color, period, offset) {};
 
     return Tree;
 
