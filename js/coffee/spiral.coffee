@@ -27,7 +27,7 @@ class Spiral extends DrawableObject
     @offset = 0
     @factor = config.factor or factor
     @linelength = config.linelength or linelength
-    super
+    super [], @period
 
   computeLineSegments: ->
     lineSegments = []

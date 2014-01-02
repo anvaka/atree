@@ -29,7 +29,7 @@ class Screen
     @projection = new Projection screenConfig
 
     @ctx = @elem.getContext '2d'
-    @tree = new Tree
+    @tree = new Tree period
     @spirals = []
     dtheta = Math.PI * 2 / colors.length
     for color, i in colors
@@ -45,8 +45,6 @@ class Screen
     @offset -= 1
     @offset += period if @offset <= -period
     @renderObject @tree.lineSegments(@offset)
-#    for spiral in @spirals
-#      @renderObject spiral.lineSegments(@offset)
 
   renderObject: (segments) ->
     for s in segments

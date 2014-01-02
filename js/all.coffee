@@ -1,12 +1,18 @@
 class DrawableObject
-  constructor: ->
+  constructor: (@objects = [], @period = period) ->
     @computedLineSegments = @computeLineSegments()
 
   lineSegments: (offset) ->
-    @computedLineSegments[offset]
+    lineSegments = []
+    for object in @objects
+      lineSegments = lineSegments.concat object.lineSegments(offset)
+    lineSegments.concat @computedLineSegments[offset]
 
   computeLineSegments: ->
-    []
+    lineSegments = []
+    for offset in [0...-@period]
+      lineSegments[offset] = []
+    lineSegments
 
 class Spiral extends DrawableObject
   thetamin = 0
@@ -37,7 +43,7 @@ class Spiral extends DrawableObject
     @offset = 0
     @factor = config.factor or factor
     @linelength = config.linelength or linelength
-    super
+    super [], @period
 
   computeLineSegments: ->
     lineSegments = []
@@ -96,21 +102,12 @@ class Tree extends DrawableObject
     '#ffffff',
   ]
 
-  constructor: ->
-    @spirals = []
+  constructor: (@period = period) ->
+    spirals = []
     dtheta = Math.PI * 2 / colors.length
     for color, i in colors
-      @spirals.push new Spiral color, dtheta * i, period
-    super
-
-  lineSegments: (offset) ->
-    lineSegments = []
-    for spiral in @spirals
-      lineSegments = lineSegments.concat spiral.lineSegments(offset)
-    lineSegments.concat @computeLineSegments()
-
-  computeLineSegments: ->
-    []
+      spirals.push new Spiral color, dtheta * i, @period
+    super spirals, @period
 
 class Projection
   xscreenoffset = 260
@@ -163,7 +160,7 @@ class Screen
     @projection = new Projection screenConfig
 
     @ctx = @elem.getContext '2d'
-    @tree = new Tree
+    @tree = new Tree period
     @spirals = []
     dtheta = Math.PI * 2 / colors.length
     for color, i in colors
@@ -179,8 +176,6 @@ class Screen
     @offset -= 1
     @offset += period if @offset <= -period
     @renderObject @tree.lineSegments(@offset)
-#    for spiral in @spirals
-#      @renderObject spiral.lineSegments(@offset)
 
   renderObject: (segments) ->
     for s in segments

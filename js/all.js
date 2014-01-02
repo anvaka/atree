@@ -5,16 +5,30 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   DrawableObject = (function() {
-    function DrawableObject() {
+    function DrawableObject(objects, period) {
+      this.objects = objects != null ? objects : [];
+      this.period = period != null ? period : period;
       this.computedLineSegments = this.computeLineSegments();
     }
 
     DrawableObject.prototype.lineSegments = function(offset) {
-      return this.computedLineSegments[offset];
+      var lineSegments, object, _i, _len, _ref;
+      lineSegments = [];
+      _ref = this.objects;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        object = _ref[_i];
+        lineSegments = lineSegments.concat(object.lineSegments(offset));
+      }
+      return lineSegments.concat(this.computedLineSegments[offset]);
     };
 
     DrawableObject.prototype.computeLineSegments = function() {
-      return [];
+      var lineSegments, offset, _i, _ref;
+      lineSegments = [];
+      for (offset = _i = 0, _ref = -this.period; 0 <= _ref ? _i < _ref : _i > _ref; offset = 0 <= _ref ? ++_i : --_i) {
+        lineSegments[offset] = [];
+      }
+      return lineSegments;
     };
 
     return DrawableObject;
@@ -66,7 +80,7 @@
       this.offset = 0;
       this.factor = config.factor || factor;
       this.linelength = config.linelength || linelength;
-      Spiral.__super__.constructor.apply(this, arguments);
+      Spiral.__super__.constructor.call(this, [], this.period);
     }
 
     Spiral.prototype.computeLineSegments = function() {
@@ -149,31 +163,17 @@
 
     colors = ['#ff0000', '#d4a017', '#00ff00', '#ffffff'];
 
-    function Tree() {
-      var color, dtheta, i, _i, _len;
-      this.spirals = [];
+    function Tree(period) {
+      var color, dtheta, i, spirals, _i, _len;
+      this.period = period != null ? period : period;
+      spirals = [];
       dtheta = Math.PI * 2 / colors.length;
       for (i = _i = 0, _len = colors.length; _i < _len; i = ++_i) {
         color = colors[i];
-        this.spirals.push(new Spiral(color, dtheta * i, period));
+        spirals.push(new Spiral(color, dtheta * i, this.period));
       }
-      Tree.__super__.constructor.apply(this, arguments);
+      Tree.__super__.constructor.call(this, spirals, this.period);
     }
-
-    Tree.prototype.lineSegments = function(offset) {
-      var lineSegments, spiral, _i, _len, _ref;
-      lineSegments = [];
-      _ref = this.spirals;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        spiral = _ref[_i];
-        lineSegments = lineSegments.concat(spiral.lineSegments(offset));
-      }
-      return lineSegments.concat(this.computeLineSegments());
-    };
-
-    Tree.prototype.computeLineSegments = function() {
-      return [];
-    };
 
     return Tree;
 
@@ -244,7 +244,7 @@
       this.elem.setAttribute('height', "" + this.height + "px");
       this.projection = new Projection(screenConfig);
       this.ctx = this.elem.getContext('2d');
-      this.tree = new Tree;
+      this.tree = new Tree(period);
       this.spirals = [];
       dtheta = Math.PI * 2 / colors.length;
       for (i = _i = 0, _len = colors.length; _i < _len; i = ++_i) {

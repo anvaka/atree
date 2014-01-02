@@ -11,18 +11,9 @@ class Tree extends DrawableObject
     '#ffffff',
   ]
 
-  constructor: ->
-    @spirals = []
+  constructor: (@period = period) ->
+    spirals = []
     dtheta = Math.PI * 2 / colors.length
     for color, i in colors
-      @spirals.push new Spiral color, dtheta * i, period
-    super
-
-  lineSegments: (offset) ->
-    lineSegments = []
-    for spiral in @spirals
-      lineSegments = lineSegments.concat spiral.lineSegments(offset)
-    lineSegments.concat @computeLineSegments()
-
-  computeLineSegments: ->
-    []
+      spirals.push new Spiral color, dtheta * i, @period
+    super spirals, @period
