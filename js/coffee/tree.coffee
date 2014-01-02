@@ -1,3 +1,4 @@
+#= require DrawableObject
 #= require Spiral
 class Tree extends DrawableObject
   period = 5

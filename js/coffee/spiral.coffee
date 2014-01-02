@@ -1,3 +1,4 @@
+#= require DrawableObject
 class Spiral extends DrawableObject
   thetamin = 0
   thetamax = 6 * Math.PI

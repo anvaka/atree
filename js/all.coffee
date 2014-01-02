@@ -14,6 +14,7 @@ class DrawableObject
       lineSegments[offset] = []
     lineSegments
 
+
 class Spiral extends DrawableObject
   thetamin = 0
   thetamax = 6 * Math.PI
@@ -88,6 +89,7 @@ class Spiral extends DrawableObject
       c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16)
       rgb += ("00" + c).substr(c.length)
     rgb
+
 
 
 class Tree extends DrawableObject
