@@ -160,20 +160,19 @@
       Tree.__super__.constructor.apply(this, arguments);
     }
 
-    Tree.prototype.computeLineSegments = function() {
-      var i, lineSegments, spiral, _i, _j, _k, _len, _ref;
+    Tree.prototype.lineSegments = function(offset) {
+      var lineSegments, spiral, _i, _len, _ref;
       lineSegments = [];
-      for (i = _i = 0; 0 <= -period ? _i < -period : _i > -period; i = 0 <= -period ? ++_i : --_i) {
-        lineSegments[i] = [];
-      }
       _ref = this.spirals;
-      for (_j = 0, _len = _ref.length; _j < _len; _j++) {
-        spiral = _ref[_j];
-        for (i = _k = 0; 0 <= -period ? _k < -period : _k > -period; i = 0 <= -period ? ++_k : --_k) {
-          lineSegments[i] = lineSegments[i].concat(spiral.lineSegments(i));
-        }
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        spiral = _ref[_i];
+        lineSegments = lineSegments.concat(spiral.lineSegments(offset));
       }
-      return lineSegments;
+      return lineSegments.concat(this.computeLineSegments());
+    };
+
+    Tree.prototype.computeLineSegments = function() {
+      return [];
     };
 
     return Tree;

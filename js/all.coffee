@@ -103,13 +103,14 @@ class Tree extends DrawableObject
       @spirals.push new Spiral color, dtheta * i, period
     super
 
-  computeLineSegments: ->
+  lineSegments: (offset) ->
     lineSegments = []
-    lineSegments[i] = [] for i in [0...-period]
     for spiral in @spirals
-      for i in [0...-period]
-        lineSegments[i] = lineSegments[i].concat spiral.lineSegments(i)
-    lineSegments
+      lineSegments = lineSegments.concat spiral.lineSegments(offset)
+    lineSegments.concat @computeLineSegments()
+
+  computeLineSegments: ->
+    []
 
 class Projection
   xscreenoffset = 260
