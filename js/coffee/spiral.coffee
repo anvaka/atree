@@ -30,7 +30,7 @@ class Spiral extends DrawableObject
     super
 
   computeLineSegments: ->
-    lineSegments = {}
+    lineSegments = []
     offset = 0
     while offset > -@period
       lineSegments[offset] = lines = []

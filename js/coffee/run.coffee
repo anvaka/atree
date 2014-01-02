@@ -1,3 +1,3 @@
-#= require Tree
-tree = new Tree 'scene', {}
-tree.run()
+#= require Screen
+screen = new Screen 'scene', {}
+screen.run()

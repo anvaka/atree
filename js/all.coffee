@@ -1,23 +1,3 @@
-class Projection
-  xscreenoffset = 260
-  yscreenoffset = 300
-  xscreenscale = 360
-  yscreenscale = 360
-  ycamera = 2
-  zcamera = -3
-
-  constructor: (config) ->
-    @xscreenoffset = config.xscreenoffset or yscreenoffset
-    @yscreenoffset = config.yscreenoffset or yscreenoffset
-    @xscreenscale  = config.xscreenscale or xscreenscale
-    @yscreenscale  = config.yscreenscale or yscreenscale
-    @ycamera = config.ycamera or ycamera
-    @zcamera = config.zcamera or zcamera
-
-  to2d: (x, y, z) ->
-    x: @xscreenoffset + @xscreenscale * (x / (z - @zcamera))
-    y: @yscreenoffset + @yscreenscale * ((y - @ycamera) / (z - @zcamera))
-
 class DrawableObject
   constructor: ->
     @computedLineSegments = @computeLineSegments()
@@ -37,13 +17,18 @@ class Spiral extends DrawableObject
   linespacing = 1 / 30
   linelength = linespacing / 2
 
-  class SpiralShadow
-    constructor: (@offset, @factor_rate, @color_rate) ->
-
   spiralShadows = [
-    new SpiralShadow 0, 1, 0
-    new SpiralShadow Math.PI * 0.05, 0.93, -0.7
-    new SpiralShadow Math.PI * 0.08, 0.9, -0.85
+    offset: 0
+    factor_rate: 1
+    color_rate: 0
+  ,
+    offset: Math.PI * 0.05
+    factor_rate: 0.93
+    color_rate: -0.7
+  ,
+    offset: Math.PI * 0.08
+    factor_rate: 0.9
+    color_rate: -0.85
   ]
 
   constructor: (@foreground, @angleoffset, @period, config = {}) ->
@@ -55,7 +40,7 @@ class Spiral extends DrawableObject
     super
 
   computeLineSegments: ->
-    lineSegments = {}
+    lineSegments = []
     offset = 0
     while offset > -@period
       lineSegments[offset] = lines = []
@@ -99,8 +84,56 @@ class Spiral extends DrawableObject
     rgb
 
 
+class Tree extends DrawableObject
+  period = 5
+  width = 500
+  height = 500
 
-class Tree
+  colors = [
+    '#ff0000',
+    '#d4a017',
+    '#00ff00',
+    '#ffffff',
+  ]
+
+  constructor: ->
+    @spirals = []
+    dtheta = Math.PI * 2 / colors.length
+    for color, i in colors
+      @spirals.push new Spiral color, dtheta * i, period
+    super
+
+  computeLineSegments: ->
+    lineSegments = []
+    lineSegments[i] = [] for i in [0...-period]
+    for spiral in @spirals
+      for i in [0...-period]
+        lineSegments[i] = lineSegments[i].concat spiral.lineSegments(i)
+    lineSegments
+
+class Projection
+  xscreenoffset = 260
+  yscreenoffset = 300
+  xscreenscale = 360
+  yscreenscale = 360
+  ycamera = 2
+  zcamera = -3
+
+  constructor: (config) ->
+    @xscreenoffset = config.xscreenoffset or yscreenoffset
+    @yscreenoffset = config.yscreenoffset or yscreenoffset
+    @xscreenscale  = config.xscreenscale or xscreenscale
+    @yscreenscale  = config.yscreenscale or yscreenscale
+    @ycamera = config.ycamera or ycamera
+    @zcamera = config.zcamera or zcamera
+
+  to2d: (x, y, z) ->
+    x: @xscreenoffset + @xscreenscale * (x / (z - @zcamera))
+    y: @yscreenoffset + @yscreenscale * ((y - @ycamera) / (z - @zcamera))
+
+
+
+class Screen
   period = 5
   width = 500
   height = 500
@@ -129,7 +162,7 @@ class Tree
     @projection = new Projection screenConfig
 
     @ctx = @elem.getContext '2d'
-
+    @tree = new Tree
     @spirals = []
     dtheta = Math.PI * 2 / colors.length
     for color, i in colors
@@ -144,8 +177,9 @@ class Tree
     @ctx.beginPath()
     @offset -= 1
     @offset += period if @offset <= -period
-    for spiral in @spirals
-      @renderObject spiral.lineSegments(@offset)
+    @renderObject @tree.lineSegments(@offset)
+#    for spiral in @spirals
+#      @renderObject spiral.lineSegments(@offset)
 
   renderObject: (segments) ->
     for s in segments
@@ -167,10 +201,7 @@ class Tree
       @run()
     , 1000 / 24)
 
-tree = new Tree 'scene', {}
-tree.run()
 
-
-tree = new Tree 'scene', {}
-tree.run()
+screen = new Screen 'scene', {}
+screen.run()
 
