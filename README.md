@@ -13,9 +13,10 @@ The tree is built of two spirals. These [11 lines of code](https://github.com/an
 
 ![spiral](http://upload.wikimedia.org/wikipedia/commons/a/a5/ComplexSinInATimeAxe.gif)
 
-How to compile it the javascript?
-------------------
-You need CoffeeScript
+
+Written in coffeescript
+-----------------------
+You need CoffeeScript to compile the javascript
 
 https://github.com/jashkenas/coffee-script
 
