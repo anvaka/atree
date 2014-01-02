@@ -26,14 +26,13 @@ class Screen
     @offset = 0
     @elem.setAttribute 'width', "#{@width}px"
     @elem.setAttribute 'height',"#{@height}px"
+
     @projection = new Projection screenConfig
 
     @ctx = @elem.getContext '2d'
-    @tree = new Tree period
-    @spirals = []
-    dtheta = Math.PI * 2 / colors.length
-    for color, i in colors
-      @spirals.push new Spiral color, dtheta * i, period
+
+    @drawable_objects = []
+    @drawable_objects.push new Tree period
 
   run: ->
     @requestAnimationFrame()
@@ -44,7 +43,8 @@ class Screen
     @ctx.beginPath()
     @offset -= 1
     @offset += period if @offset <= -period
-    @renderObject @tree.lineSegments(@offset)
+    for drawable_object in @drawable_objects
+      @renderObject drawable_object.lineSegments(@offset)
 
   renderObject: (segments) ->
     for s in segments

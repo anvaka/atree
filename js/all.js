@@ -235,7 +235,6 @@
     };
 
     function Screen(elem, config) {
-      var color, dtheta, i, _i, _len;
       this.elem = document.getElementById(elem);
       this.width = config.width || width;
       this.height = config.height || height;
@@ -244,13 +243,8 @@
       this.elem.setAttribute('height', "" + this.height + "px");
       this.projection = new Projection(screenConfig);
       this.ctx = this.elem.getContext('2d');
-      this.tree = new Tree(period);
-      this.spirals = [];
-      dtheta = Math.PI * 2 / colors.length;
-      for (i = _i = 0, _len = colors.length; _i < _len; i = ++_i) {
-        color = colors[i];
-        this.spirals.push(new Spiral(color, dtheta * i, period));
-      }
+      this.drawable_objects = [];
+      this.drawable_objects.push(new Tree(period));
     }
 
     Screen.prototype.run = function() {
@@ -259,13 +253,20 @@
     };
 
     Screen.prototype.renderFrame = function() {
+      var drawable_object, _i, _len, _ref, _results;
       this.ctx.clearRect(0, 0, this.width, this.height);
       this.ctx.beginPath();
       this.offset -= 1;
       if (this.offset <= -period) {
         this.offset += period;
       }
-      return this.renderObject(this.tree.lineSegments(this.offset));
+      _ref = this.drawable_objects;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        drawable_object = _ref[_i];
+        _results.push(this.renderObject(drawable_object.lineSegments(this.offset)));
+      }
+      return _results;
     };
 
     Screen.prototype.renderObject = function(segments) {
