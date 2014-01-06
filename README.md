@@ -13,6 +13,21 @@ The tree is built of two spirals. These [11 lines of code](https://github.com/an
 
 ![spiral](http://upload.wikimedia.org/wikipedia/commons/a/a5/ComplexSinInATimeAxe.gif)
 
+
+Written in coffeescript
+-----------------------
+You need CoffeeScript to compile the javascript
+
+https://github.com/jashkenas/coffee-script
+
+and coffeescript-concat in order to avoid classes dependencies
+
+https://github.com/fairfieldt/coffeescript-concat
+
+and then run
+
+        coffeescript-concat -I js/coffee -o js/all.coffee && coffee -c js/all.coffee
+
 It's almost perfect now
 -----------------------
 
