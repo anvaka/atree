@@ -5,7 +5,7 @@ I found animated Christmas tree on reddit:
 
 ![reddit tree](http://i.imgur.com/Fy4S1jR.gif)
 
-Was curious to make it in js. Current results are here: [Happy new  2018!](http://anvaka.github.io/atree/). Wish you all great successes and joy, doing what you love!
+Was curious to make it in js. Current results are here: [Happy new  2019!](http://anvaka.github.io/atree/). Wish you all great successes and joy, doing what you love!
 
 How it's built?
 ---------------
