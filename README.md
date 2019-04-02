@@ -24,7 +24,7 @@ Huge appreciation goes to [@CensoredUsername](https://github.com/CensoredUsernam
 
 Vitaliy Kaurov implemented the same tree in Wolfram language... in just [15 lines of code](http://community.wolfram.com/groups/-/m/t/175891).
 
-[David Librera](https://github.com/davidlibrera) rewrote this in CoffeScript. Checkout [his repository](https://github.com/davidlibrera/atree/tree/master/js/coffee) for nice OO design. 
+[David Librera](https://github.com/davidlibrera) rewrote this in CoffeeScript. Checkout [his repository](https://github.com/davidlibrera/atree/tree/master/js/coffee) for nice OO design. 
 
 So, what's left? Just small changes which could make this tree perfect:
 
