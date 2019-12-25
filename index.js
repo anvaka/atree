@@ -15,76 +15,63 @@ var thetamin = 0,
 
 function run() {
   var ctx = document.getElementById('scene').getContext('2d'),
-    redSpiral = new Spiral({
-      foreground: "#ff0000",
-      angleoffset: Math.PI,
-      factor: factor
-    }),
-    redSpiralShadow = new Spiral({
-      foreground: "#660000",
-      angleoffset: Math.PI * 0.95,
-      factor: 0.93 * factor
-    }),
-    redSpiralShadow2 = new Spiral({
-      foreground: "#220000",
-      angleoffset: Math.PI * 0.92,
-      factor: 0.90 * factor
-    }),
-    cyanSpiral = new Spiral({
-      foreground: "#00ffcc",
-      angleoffset: 0,
-      factor: factor
-    }),
-    cyanSpiralShadow = new Spiral({
-      foreground: "#003322",
-      angleoffset: -Math.PI * 0.05,
-      factor: 0.93 * factor
-    }),
-    cyanSpiralShadow2 = new Spiral({
-      foreground: "#002211",
-      angleoffset: -Math.PI * 0.08,
-      factor: 0.90 * factor
-    });
+      spirals = [
+        new Spiral({
+          foreground: "#220000", // Second shadow for red spiral
+          angleoffset: Math.PI * 0.92,
+          factor: 0.90 * factor
+        }),
+        new Spiral({
+          foreground: "#002211", // Second shadow for cyan spiral
+          angleoffset: -Math.PI * 0.08,
+          factor: 0.90 * factor
+        }),
+        new Spiral({
+          foreground: "#660000", // red spiral shadow
+          angleoffset: Math.PI * 0.95,
+          factor: 0.93 * factor
+        }),
+        new Spiral({
+          foreground: "#003322", // cyan spiral shadow
+          angleoffset: -Math.PI * 0.05,
+          factor: 0.93 * factor
+        }),
+        new Spiral({
+          foreground: "#ff0000", // red Spiral
+          angleoffset: Math.PI,
+          factor: factor
+        }),
+        new Spiral({
+          foreground: "#00ffcc", // cyan spiral
+          angleoffset: 0,
+          factor: factor
+        })];
 
-  render();
-
-  function render() {
-    requestAnimationFrame(render);
-    renderFrame();
-  }
+  renderFrame(); // animation loop starts here
 
   function renderFrame() {
+    requestAnimationFrame(renderFrame);
+
     ctx.clearRect(0, 0, 500, 500);
     ctx.beginPath();
+    spirals.forEach(renderSpiral);
+  }
 
-    redSpiralShadow2.draw(ctx);
-    cyanSpiralShadow2.draw(ctx);
-
-    redSpiralShadow.draw(ctx);
-    cyanSpiralShadow.draw(ctx);
-
-    redSpiral.draw(ctx);
-    cyanSpiral.draw(ctx);
+  function renderSpiral(spiral) {
+    spiral.render(ctx);
   }
 
   function Spiral(config) {
-    this.period = config.period || period;
-    this.spacing = config.spacing || linespacing;
-    this.offset = 0;
-    this.rate = config.rate || rate;
-    this.linelength = config.linelength || linelength;
+    var offset = 0;
+    var lineSegments = computeLineSegments();
 
-    var angleoffset = config.angleoffset || 0;
-    var _factor = config.factor || factor;
-    var lineSegments = computeLineSegments.call(this);
-
-    this.draw = function(ctx) {
-      this.offset -= 1;
-      if (this.offset <= -this.period) {
-        this.offset += this.period;
+    this.render = function(ctx) {
+      offset -= 1;
+      if (offset <= -period) {
+        offset += period;
       }
 
-      lineSegments[this.offset].forEach(drawLineSegment);
+      lineSegments[offset].forEach(drawLineSegment);
     };
 
     function drawLineSegment(segment) {
@@ -96,20 +83,20 @@ function run() {
     function computeLineSegments() {
       var lineSegments = {};
       var factor = config.factor;
-      var thetanew, pointsAtOffset, thetaold, rate = this.rate;
-      for (var offset = 0; offset > -this.period; offset--) {
+      var thetanew, thetaold;
+      for (var offset = 0; offset > -period; offset--) {
         lineSegments[offset] = lines = [];
-        for (var theta = thetamin + getdtheta(thetamin, offset * this.spacing / this.period, rate, factor); theta < thetamax; theta += getdtheta(theta, this.spacing, rate, factor)) {
+        for (var theta = thetamin + getdtheta(thetamin, offset * linespacing / period, rate, factor); theta < thetamax; theta += getdtheta(theta, linespacing, rate, factor)) {
           thetaold = (theta >= thetamin) ? theta : thetamin;
-          thetanew = theta + getdtheta(theta, this.linelength, rate, factor);
+          thetanew = theta + getdtheta(theta, linelength, rate, factor);
 
           if (thetanew <= thetamin) {
             continue;
           }
 
           lines.push({
-            start: getPointByAngle(thetaold, factor, angleoffset, rate),
-            end: getPointByAngle(thetanew, factor, angleoffset, rate)
+            start: getPointByAngle(thetaold, factor, config.angleoffset, rate),
+            end: getPointByAngle(thetanew, factor, config.angleoffset, rate)
           });
         }
       }
@@ -138,8 +125,8 @@ function run() {
     return point;
   }
 
-  function getdtheta(theta, length, rate, factor) {
-    return length / Math.sqrt(rate * rate + factor * factor * theta * theta);
+  function getdtheta(theta, lineLength, rate, factor) {
+    return lineLength / Math.sqrt(rate * rate + factor * factor * theta * theta);
   }
 
   function projectTo2d(x, y, z) {
