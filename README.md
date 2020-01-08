@@ -28,6 +28,8 @@ Vitaliy Kaurov implemented the same tree in Wolfram language... in just [15 line
 
 Chris Warren-Smith [wrote it in SmallBASIC](https://gist.github.com/chrisws/3cf97b7b7f1c2d6f9741464a2dfb3c3b)
 
+Mike Mallin made it [available in C](https://github.com/mremallin/christmas_tree) using SDL2 and OpenGL 3.2
+
 So, what's left? Just small changes which could make this tree perfect:
 
 * Shadows are not accurate
